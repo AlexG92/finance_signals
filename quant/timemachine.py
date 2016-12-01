@@ -10,17 +10,21 @@ Out:
 historical prediction
 accuracy of prediction
 """
-
+import sys
 from datetime import datetime
 import quantpredict
 import bisect
 import copy
-# import csv
+from ticker_classes import StockDay
+from read_ticker_csv import get_stock_data
 
-# Static Data
-ticker = "AMZN"
-csv = "../samples/%s.csv" % ticker
-lines_5yr = 1260
+ticker = ""
+try:
+    ticker = sys.argv[1]
+except IndexError:
+    raise IndexError("Need to enter valid ticker as a system param.")
+
+#Static Data
 history = []
 
 
@@ -34,23 +38,10 @@ def jumpTo(year, month, day):
 
 # Consider using dictionary if it helps with quantpredict so you don't need indexes all the time or something
 # https://docs.python.org/3/library/csv.html
-line_counter = 0
-with open(csv) as file:
-    file.readline()  # remove csv header
-    for line in file:
-        line_counter += 1
-        line = line.strip('\n')
-        data = line.split(',')
+stock_data = get_stock_data(ticker)
 
-        day = datetime.strptime(data[0], '%Y-%m-%d').date()
-        # day = str(day)  # If date matters, remove str conversion
-        op = round(float(data[1]), 2)
-        hi = round(float(data[2]), 2)
-        lo = round(float(data[3]), 2)
-        cl = round(float(data[4]), 2)
-        vol = int(data[5])
-
-        history.insert(0, (day, op, hi, lo, cl, vol))
+for stock_day in stock_data:
+        history.insert(0, (stock_day.day, stock_day.op, stock_day.hi, stock_day.lo, stock_day.cl, stock_day.vol))
 
 # Debug stuff
 # print("read %i lines" % line_counter)
